@@ -9,8 +9,8 @@ import {Events} from "./libraries/Events.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {MarketLib} from "./libraries/MarketLib.sol";
 
-import {DataTypes} from "@aave-v3-core/protocol/libraries/types/DataTypes.sol";
-import {UserConfiguration} from "@aave-v3-core/protocol/libraries/configuration/UserConfiguration.sol";
+import {DataTypes} from "@aave-v3-origin/protocol/libraries/types/DataTypes.sol";
+import {UserConfiguration} from "@aave-v3-origin/protocol/libraries/configuration/UserConfiguration.sol";
 
 import {MorphoInternal} from "./MorphoInternal.sol";
 

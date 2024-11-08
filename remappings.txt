@@ -8,10 +8,10 @@ config/=config/
 @morpho-utils/=lib/morpho-utils/src/
 @morpho-data-structures/=lib/morpho-data-structures/src/
 
-@openzeppelin/=lib/morpho-utils/lib/openzeppelin-contracts/
+@openzeppelin/contracts/=lib/morpho-utils/lib/openzeppelin-contracts/contracts/
 @openzeppelin-upgradeable/=lib/morpho-utils/lib/openzeppelin-contracts-upgradeable/contracts/
 
-@aave-v3-core/=lib/aave-v3-core/contracts/
+@aave-v3-origin/=lib/aave-v3-origin/src/contracts/
 @aave-v3-periphery/=lib/aave-v3-periphery/contracts/
 
 @solmate/=lib/solmate/src/

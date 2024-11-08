@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.0;
 
-import {IPoolConfigurator} from "test/helpers/IPoolConfigurator.sol";
+import {IPoolConfigurator} from "@aave-v3-origin/interfaces/IPoolConfigurator.sol";
 
 contract PoolAdminMock {
     IPoolConfigurator internal immutable _POOL_CONFIGURATOR;

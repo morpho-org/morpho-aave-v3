@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.0;
 
-import {IAaveOracle} from "@aave-v3-core/interfaces/IAaveOracle.sol";
-import {IPoolAddressesProvider} from "@aave-v3-core/interfaces/IPoolAddressesProvider.sol";
+import {IAaveOracle} from "@aave-v3-origin/interfaces/IAaveOracle.sol";
+import {IPoolAddressesProvider} from "@aave-v3-origin/interfaces/IPoolAddressesProvider.sol";
 
 contract AaveOracleMock is IAaveOracle {
     address public immutable BASE_CURRENCY;

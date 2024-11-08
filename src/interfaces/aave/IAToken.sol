@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {IScaledBalanceToken} from "@aave-v3-core/interfaces/IScaledBalanceToken.sol";
-import {IInitializableAToken} from "@aave-v3-core/interfaces/IInitializableAToken.sol";
+import {IScaledBalanceToken} from "@aave-v3-origin/interfaces/IScaledBalanceToken.sol";
+import {IInitializableAToken} from "@aave-v3-origin/interfaces/IInitializableAToken.sol";
 
 /**
  * @title IAToken

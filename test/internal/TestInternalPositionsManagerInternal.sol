@@ -393,18 +393,16 @@ contract TestInternalPositionsManagerInternal is InternalTest, PositionsManagerI
 
         DataTypes.ReserveConfigurationMap memory borrowConfig = _pool.getConfiguration(wbtc);
         DataTypes.ReserveConfigurationMap memory collateralConfig = _pool.getConfiguration(dai);
-        DataTypes.EModeCategory memory eModeCategory = _pool.getEModeCategoryData(_eModeCategoryId);
+        DataTypes.CollateralConfig memory eModeCollateralConfig =
+            _pool.getEModeCategoryCollateralConfig(_eModeCategoryId);
 
-        (,,, vars.borrowedTokenUnit,,) = borrowConfig.getParams();
-        (,, vars.liquidationBonus, vars.collateralTokenUnit,,) = collateralConfig.getParams();
+        (,,, vars.borrowedTokenUnit,) = borrowConfig.getParams();
+        (,, vars.liquidationBonus, vars.collateralTokenUnit,) = collateralConfig.getParams();
 
-        bool isInCollateralEMode;
-        (, vars.borrowedPrice, vars.borrowedTokenUnit) =
-            _assetData(wbtc, oracle, borrowConfig, eModeCategory.priceSource);
-        (isInCollateralEMode, vars.collateralPrice, vars.collateralTokenUnit) =
-            _assetData(dai, oracle, collateralConfig, eModeCategory.priceSource);
+        (vars.borrowedPrice, vars.borrowedTokenUnit) = _assetData(wbtc, oracle, borrowConfig);
+        (vars.collateralPrice, vars.collateralTokenUnit) = _assetData(dai, oracle, collateralConfig);
 
-        if (isInCollateralEMode) vars.liquidationBonus = eModeCategory.liquidationBonus;
+        if (_hasTailoredParametersInEmode(dai)) vars.liquidationBonus = eModeCollateralConfig.liquidationBonus;
 
         TestSeizeVars memory expected;
         TestSeizeVars memory actual;

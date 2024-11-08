@@ -230,7 +230,11 @@ contract TestIntegrationUpgrade is IntegrationTest {
         assertEq(s1.market.reserveFactor, s2.market.reserveFactor, "market.reserveFactor");
         assertEq(s1.market.p2pIndexCursor, s2.market.p2pIndexCursor, "market.p2pIndexCursor");
         assertEq(s1.market.aToken, s2.market.aToken, "market.aToken");
-        assertEq(s1.market.stableDebtToken, s2.market.stableDebtToken, "market.stableDebtToken");
+        assertEq(
+            s1.market._deprecated_stableDebtToken,
+            s2.market._deprecated_stableDebtToken,
+            "market._deprecated_stableDebtToken"
+        );
         assertEq(s1.market.idleSupply, s2.market.idleSupply, "market.idleSupply");
 
         for (uint256 i; i < s1.marketsCreated.length; i++) {

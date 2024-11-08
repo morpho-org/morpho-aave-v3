@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import {IMorpho} from "src/interfaces/IMorpho.sol";
 
 import {Errors} from "src/libraries/Errors.sol";
-import {UserConfiguration} from "@aave-v3-core/protocol/libraries/configuration/UserConfiguration.sol";
+import {UserConfiguration} from "@aave-v3-origin/protocol/libraries/configuration/UserConfiguration.sol";
 
 import {Morpho} from "src/Morpho.sol";
 

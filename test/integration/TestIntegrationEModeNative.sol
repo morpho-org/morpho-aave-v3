@@ -5,18 +5,28 @@ import {IWETHGateway} from "src/interfaces/extensions/IWETHGateway.sol";
 
 import {WETHGateway} from "src/extensions/WETHGateway.sol";
 
+import {EModeConfiguration} from "@aave-v3-origin/protocol/libraries/configuration/EModeConfiguration.sol";
+
 import "test/helpers/IntegrationTest.sol";
 
 contract TestIntegrationEModeNative is IntegrationTest {
     using Math for uint256;
     using PercentageMath for uint256;
     using TestMarketLib for TestMarket;
-    using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+    using EModeConfiguration for uint128;
 
     function setUp() public virtual override {
-        DataTypes.ReserveConfigurationMap memory lsdConfig = pool.getConfiguration(stNative);
+        // Guess the eModeCategoryId for LSD to be 1.
+        eModeCategoryId = 1;
 
-        eModeCategoryId = uint8(lsdConfig.getEModeCategory());
+        // Verify the guess that eModeCategoryId for LSD is 1.
+        uint256 stNativeIndex = pool.getReserveData(stNative).id;
+        DataTypes.CollateralConfig memory collateralConfig = pool.getEModeCategoryCollateralConfig(eModeCategoryId);
+        require(collateralConfig.liquidationThreshold != 0, "not activated e-mode");
+        require(
+            pool.getEModeCategoryCollateralBitmap(eModeCategoryId).isReserveEnabledOnBitmap(stNativeIndex),
+            "wrong e-mode category"
+        );
 
         super.setUp();
     }
@@ -77,7 +87,7 @@ contract TestIntegrationEModeNative is IntegrationTest {
         borrowed = bound(
             borrowed,
             wNativeMarket.borrowable(collateralMarket, rawCollateral, 0).percentAdd(20),
-            wNativeMarket.borrowable(collateralMarket, rawCollateral, collateralMarket.eModeCategoryId).percentAdd(20)
+            wNativeMarket.borrowable(collateralMarket, rawCollateral, eModeCategoryId).percentAdd(20)
         );
 
         user.approve(collateralMarket.underlying, rawCollateral);

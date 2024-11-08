@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import {IAToken} from "../interfaces/aave/IAToken.sol";
-import {IPool} from "@aave-v3-core/interfaces/IPool.sol";
+import {IPool} from "@aave-v3-origin/interfaces/IPool.sol";
 
 import {Types} from "./Types.sol";
 import {Events} from "./Events.sol";
@@ -14,8 +14,8 @@ import {WadRayMath} from "@morpho-utils/math/WadRayMath.sol";
 import {PercentageMath} from "@morpho-utils/math/PercentageMath.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
-import {DataTypes} from "@aave-v3-core/protocol/libraries/types/DataTypes.sol";
-import {ReserveConfiguration} from "@aave-v3-core/protocol/libraries/configuration/ReserveConfiguration.sol";
+import {DataTypes} from "@aave-v3-origin/protocol/libraries/types/DataTypes.sol";
+import {ReserveConfiguration} from "@aave-v3-origin/protocol/libraries/configuration/ReserveConfiguration.sol";
 
 /// @title MarketLib
 /// @author Morpho Labs
@@ -26,7 +26,7 @@ library MarketLib {
     using SafeCast for uint256;
     using WadRayMath for uint256;
     using MarketLib for Types.Market;
-    using ReserveDataLib for DataTypes.ReserveData;
+    using ReserveDataLib for DataTypes.ReserveDataLegacy;
     using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
     /// @notice Returns whether the `market` is created or not.
@@ -241,7 +241,7 @@ library MarketLib {
         Types.Market storage market,
         address underlying,
         uint256 amount,
-        DataTypes.ReserveData memory reserve,
+        DataTypes.ReserveDataLegacy memory reserve,
         Types.Indexes256 memory indexes
     ) internal returns (uint256, uint256) {
         uint256 supplyCap = reserve.configuration.getSupplyCap() * (10 ** reserve.configuration.getDecimals());

@@ -5,7 +5,8 @@ import {Constants} from "src/libraries/Constants.sol";
 
 import {Math} from "@morpho-utils/math/Math.sol";
 import {PercentageMath} from "@morpho-utils/math/PercentageMath.sol";
-import {DataTypes} from "@aave-v3-core/protocol/libraries/types/DataTypes.sol";
+import {DataTypes} from "@aave-v3-origin/protocol/libraries/types/DataTypes.sol";
+import {EModeConfiguration} from "@aave-v3-origin/protocol/libraries/configuration/EModeConfiguration.sol";
 import {collateralValue, rawCollateralValue} from "test/helpers/Utils.sol";
 
 import {ERC20} from "@solmate/tokens/ERC20.sol";
@@ -13,10 +14,10 @@ import {ERC20} from "@solmate/tokens/ERC20.sol";
 struct TestMarket {
     address aToken;
     address variableDebtToken;
-    address stableDebtToken;
     address underlying;
     string symbol;
     uint256 decimals;
+    uint256 reserveIndex;
     //
     uint256 ltv;
     uint256 lt;
@@ -31,10 +32,10 @@ struct TestMarket {
     uint256 minAmount;
     uint256 maxAmount;
     //
-    uint8 eModeCategoryId;
-    DataTypes.EModeCategory eModeCategory;
+    DataTypes.CollateralConfig eModeCollateralConfig;
+    uint128 eModeBorrowableBitmap;
+    uint128 eModeCollateralBitmap;
     //
-    bool isInEMode;
     bool isCollateral;
     bool isBorrowable;
 }
@@ -42,6 +43,7 @@ struct TestMarket {
 library TestMarketLib {
     using Math for uint256;
     using PercentageMath for uint256;
+    using EModeConfiguration for uint128;
 
     /// @dev Returns the quantity that can be borrowed/withdrawn from the market.
     function liquidity(TestMarket storage market) internal view returns (uint256) {
@@ -88,9 +90,25 @@ library TestMarketLib {
             (amount * baseMarket.price * 10 ** quoteMarket.decimals) / (quoteMarket.price * 10 ** baseMarket.decimals);
     }
 
+    function getHasTailoredParametersInEMode(TestMarket storage market, uint8 eModeCategoryId)
+        internal
+        view
+        returns (bool)
+    {
+        if (eModeCategoryId == 0) return false;
+
+        return market.eModeCollateralBitmap.isReserveEnabledOnBitmap(market.reserveIndex);
+    }
+
+    function getIsBorrowableInEMode(TestMarket storage market, uint8 eModeCategoryId) internal view returns (bool) {
+        if (eModeCategoryId == 0) return true;
+
+        return market.eModeBorrowableBitmap.isReserveEnabledOnBitmap(market.reserveIndex);
+    }
+
     function getLtv(TestMarket storage collateralMarket, uint8 eModeCategoryId) internal view returns (uint256) {
-        return eModeCategoryId != 0 && eModeCategoryId == collateralMarket.eModeCategoryId
-            ? collateralMarket.eModeCategory.ltv
+        return getHasTailoredParametersInEMode(collateralMarket, eModeCategoryId)
+            ? collateralMarket.eModeCollateralConfig.ltv
             : collateralMarket.ltv;
     }
 
@@ -98,8 +116,8 @@ library TestMarketLib {
         uint256 ltv = getLtv(collateralMarket, eModeCategoryId);
         if (ltv == 0) return 0;
 
-        return eModeCategoryId != 0 && eModeCategoryId == collateralMarket.eModeCategoryId
-            ? collateralMarket.eModeCategory.liquidationThreshold
+        return getHasTailoredParametersInEMode(collateralMarket, eModeCategoryId)
+            ? collateralMarket.eModeCollateralConfig.liquidationThreshold
             : collateralMarket.lt;
     }
 

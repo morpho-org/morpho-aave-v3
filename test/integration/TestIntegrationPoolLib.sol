@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.0;
 
-import {IPool, IPoolAddressesProvider} from "@aave-v3-core/interfaces/IPool.sol";
+import {IPool, IPoolAddressesProvider} from "@aave-v3-origin/interfaces/IPool.sol";
 
 import {PoolLib} from "src/libraries/PoolLib.sol";
-import {DataTypes} from "@aave-v3-core/protocol/libraries/types/DataTypes.sol";
+import {DataTypes} from "@aave-v3-origin/protocol/libraries/types/DataTypes.sol";
 
 import "test/helpers/ForkTest.sol";
 
@@ -20,7 +20,7 @@ contract TestIntegrationPoolLib is ForkTest {
     constructor() {
         ERC20(dai).approve(address(pool), type(uint256).max);
 
-        DataTypes.ReserveData memory reserveData = pool.getReserveData(dai);
+        DataTypes.ReserveDataLegacy memory reserveData = pool.getReserveData(dai);
         aDai = reserveData.aTokenAddress;
         vDai = reserveData.variableDebtTokenAddress;
     }

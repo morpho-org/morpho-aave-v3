@@ -8,7 +8,7 @@ install:
 	forge install
 
 contracts:
-	FOUNDRY_PROFILE=build FOUNDRY_TEST=/dev/null FOUNDRY_SCRIPT=/dev/null forge build --via-ir --extra-output-files irOptimized --sizes --force
+	FOUNDRY_TEST=/dev/null FOUNDRY_SCRIPT=/dev/null forge build --via-ir --extra-output-files irOptimized --sizes --force
 
 
 test-invariant:

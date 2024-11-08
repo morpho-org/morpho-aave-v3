@@ -3,9 +3,9 @@ pragma solidity ^0.8.17;
 
 import {IMorpho} from "src/interfaces/IMorpho.sol";
 import {IPositionsManager} from "src/interfaces/IPositionsManager.sol";
-import {IPool, IPoolAddressesProvider} from "@aave-v3-core/interfaces/IPool.sol";
-import {IPoolDataProvider} from "@aave-v3-core/interfaces/IPoolDataProvider.sol";
-import {IAToken} from "@aave-v3-core/interfaces/IAToken.sol";
+import {IPool, IPoolAddressesProvider} from "@aave-v3-origin/interfaces/IPool.sol";
+import {IPoolDataProvider} from "@aave-v3-origin/interfaces/IPoolDataProvider.sol";
+import {IAToken} from "@aave-v3-origin/interfaces/IAToken.sol";
 
 import {Types} from "src/libraries/Types.sol";
 import {ERC20, SafeTransferLib} from "@solmate/utils/SafeTransferLib.sol";

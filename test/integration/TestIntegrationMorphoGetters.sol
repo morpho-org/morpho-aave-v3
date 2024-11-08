@@ -72,7 +72,7 @@ contract TestIntegrationMorphoGetters is IntegrationTest {
 
         user.approve(market.underlying, supplied);
         user.supply(market.underlying, supplied);
-        if (market.isBorrowable && market.isInEMode) {
+        if (market.isBorrowable && market.getIsBorrowableInEMode(eModeCategoryId)) {
             _borrowWithoutCollateral(
                 address(user), market, supplied, address(user), address(user), DEFAULT_MAX_ITERATIONS
             );

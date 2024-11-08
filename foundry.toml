@@ -6,9 +6,6 @@ fs_permissions = [{ access = "read", path = "./config/"}]
 gas_limit = "18446744073709551615" # 2^64 - 1, to remove the gas limit
 evm_version = "shanghai"
 
-[profile.build]
-evm_version = "paris"
-
 [fuzz]
 runs = 32
 

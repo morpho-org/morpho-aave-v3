@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.0;
 
-import {DataTypes} from "@aave-v3-core/protocol/libraries/types/DataTypes.sol";
-import {ReserveConfiguration} from "@aave-v3-core/protocol/libraries/configuration/ReserveConfiguration.sol";
+import {DataTypes} from "@aave-v3-origin/protocol/libraries/types/DataTypes.sol";
+import {ReserveConfiguration} from "@aave-v3-origin/protocol/libraries/configuration/ReserveConfiguration.sol";
 import {LogarithmicBuckets} from "@morpho-data-structures/LogarithmicBuckets.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
@@ -50,7 +50,7 @@ contract TestInternalMorphoInternal is InternalTest {
     }
 
     function createTestMarket(address underlying, uint16 reserveFactor, uint16 p2pIndexCursor) internal {
-        DataTypes.ReserveData memory reserveData = _pool.getReserveData(underlying);
+        DataTypes.ReserveDataLegacy memory reserveData = _pool.getReserveData(underlying);
 
         Types.Market storage market = _market[underlying];
 
@@ -379,10 +379,10 @@ contract TestInternalMorphoInternal is InternalTest {
     }
 
     function testAssetLiquidityData() public view {
-        DataTypes.EModeCategory memory eModeCategory = _pool.getEModeCategoryData(0);
-        (uint256 poolLtv, uint256 poolLt,, uint256 poolDecimals,,) = _pool.getConfiguration(dai).getParams();
+        DataTypes.CollateralConfig memory eModeCollateralConfig = _pool.getEModeCategoryCollateralConfig(0);
+        (uint256 poolLtv, uint256 poolLt,, uint256 poolDecimals,) = _pool.getConfiguration(dai).getParams();
 
-        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCategory);
+        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCollateralConfig);
         (uint256 price, uint256 ltv, uint256 lt, uint256 units) = _assetLiquidityData(dai, vars);
 
         assertGt(price, 0, "price not gt 0");
@@ -401,8 +401,8 @@ contract TestInternalMorphoInternal is InternalTest {
 
         _marketBalances[dai].collateral[address(1)] = amount.rayDivUp(_market[dai].indexes.supply.poolIndex);
 
-        DataTypes.EModeCategory memory eModeCategory = _pool.getEModeCategoryData(0);
-        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCategory);
+        DataTypes.CollateralConfig memory eModeCollateralConfig = _pool.getEModeCategoryCollateralConfig(0);
+        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCollateralConfig);
 
         (uint256 borrowable, uint256 maxDebt) = _collateralData(dai, vars);
         assertEq(borrowable, 0, "borrowable != 0");
@@ -415,8 +415,8 @@ contract TestInternalMorphoInternal is InternalTest {
         _market[dai].isCollateral = true;
         _marketBalances[dai].collateral[address(1)] = amount.rayDivUp(_market[dai].indexes.supply.poolIndex);
 
-        DataTypes.EModeCategory memory eModeCategory = _pool.getEModeCategoryData(0);
-        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCategory);
+        DataTypes.CollateralConfig memory eModeCollateralConfig = _pool.getEModeCategoryCollateralConfig(0);
+        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCollateralConfig);
 
         (uint256 borrowable, uint256 maxDebt) = _collateralData(dai, vars);
 
@@ -443,8 +443,8 @@ contract TestInternalMorphoInternal is InternalTest {
             true
         );
 
-        DataTypes.EModeCategory memory eModeCategory = _pool.getEModeCategoryData(0);
-        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCategory);
+        DataTypes.CollateralConfig memory eModeCollateralConfig = _pool.getEModeCategoryCollateralConfig(0);
+        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCollateralConfig);
 
         Types.Indexes256 memory indexes = _computeIndexes(dai);
 
@@ -466,8 +466,8 @@ contract TestInternalMorphoInternal is InternalTest {
         _userCollaterals[address(1)].add(wbtc);
         _userCollaterals[address(1)].add(usdc);
 
-        DataTypes.EModeCategory memory eModeCategory = _pool.getEModeCategoryData(0);
-        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCategory);
+        DataTypes.CollateralConfig memory eModeCollateralConfig = _pool.getEModeCategoryCollateralConfig(0);
+        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCollateralConfig);
 
         (uint256 borrowable, uint256 maxDebt) = _totalCollateralData(vars);
 
@@ -513,8 +513,8 @@ contract TestInternalMorphoInternal is InternalTest {
         _userBorrows[address(1)].add(wbtc);
         _userBorrows[address(1)].add(usdc);
 
-        DataTypes.EModeCategory memory eModeCategory = _pool.getEModeCategoryData(0);
-        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCategory);
+        DataTypes.CollateralConfig memory eModeCollateralConfig = _pool.getEModeCategoryCollateralConfig(0);
+        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCollateralConfig);
         uint256 debt = _totalDebt(vars);
 
         uint256[3] memory debtSingles = [_debt(dai, vars), _debt(wbtc, vars), _debt(usdc, vars)];
@@ -560,8 +560,8 @@ contract TestInternalMorphoInternal is InternalTest {
         _userBorrows[address(1)].add(usdc);
 
         Types.LiquidityData memory liquidityData = _liquidityData(address(1));
-        DataTypes.EModeCategory memory eModeCategory = _pool.getEModeCategoryData(0);
-        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCategory);
+        DataTypes.CollateralConfig memory eModeCollateralConfig = _pool.getEModeCategoryCollateralConfig(0);
+        Types.LiquidityVars memory vars = Types.LiquidityVars(address(1), oracle, eModeCollateralConfig);
 
         (uint256 borrowable, uint256 maxDebt) = _totalCollateralData(vars);
         uint256 debt = _totalDebt(vars);

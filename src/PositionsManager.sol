@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.17;
 
-import {IPool} from "@aave-v3-core/interfaces/IPool.sol";
+import {IPool} from "@aave-v3-origin/interfaces/IPool.sol";
 import {IPositionsManager} from "./interfaces/IPositionsManager.sol";
 
 import {Types} from "./libraries/Types.sol";

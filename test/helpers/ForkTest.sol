@@ -2,23 +2,22 @@
 pragma solidity ^0.8.0;
 
 import {IAToken} from "src/interfaces/aave/IAToken.sol";
-import {IAaveOracle} from "@aave-v3-core/interfaces/IAaveOracle.sol";
-import {IPriceOracleGetter} from "@aave-v3-core/interfaces/IPriceOracleGetter.sol";
-import {IACLManager} from "@aave-v3-core/interfaces/IACLManager.sol";
-import {IPoolConfigurator} from "test/helpers/IPoolConfigurator.sol";
-import {IPoolDataProvider} from "@aave-v3-core/interfaces/IPoolDataProvider.sol";
-import {IPool, IPoolAddressesProvider} from "@aave-v3-core/interfaces/IPool.sol";
-import {IStableDebtToken} from "@aave-v3-core/interfaces/IStableDebtToken.sol";
-import {IVariableDebtToken} from "@aave-v3-core/interfaces/IVariableDebtToken.sol";
+import {IAaveOracle} from "@aave-v3-origin/interfaces/IAaveOracle.sol";
+import {IPriceOracleGetter} from "@aave-v3-origin/interfaces/IPriceOracleGetter.sol";
+import {IACLManager} from "@aave-v3-origin/interfaces/IACLManager.sol";
+import {IPoolConfigurator} from "@aave-v3-origin/interfaces/IPoolConfigurator.sol";
+import {IPoolDataProvider} from "@aave-v3-origin/interfaces/IPoolDataProvider.sol";
+import {IPool, IPoolAddressesProvider} from "@aave-v3-origin/interfaces/IPool.sol";
+import {IVariableDebtToken} from "@aave-v3-origin/interfaces/IVariableDebtToken.sol";
 import {IRewardsController} from "@aave-v3-periphery/rewards/interfaces/IRewardsController.sol";
 
 import {ReserveDataLib} from "src/libraries/ReserveDataLib.sol";
 import {ReserveDataTestLib} from "test/helpers/ReserveDataTestLib.sol";
 import {Config, ConfigLib} from "config/ConfigLib.sol";
-import {MathUtils} from "@aave-v3-core/protocol/libraries/math/MathUtils.sol";
-import {DataTypes} from "@aave-v3-core/protocol/libraries/types/DataTypes.sol";
-import {Errors as AaveErrors} from "@aave-v3-core/protocol/libraries/helpers/Errors.sol";
-import {ReserveConfiguration} from "@aave-v3-core/protocol/libraries/configuration/ReserveConfiguration.sol";
+import {MathUtils} from "@aave-v3-origin/protocol/libraries/math/MathUtils.sol";
+import {DataTypes} from "@aave-v3-origin/protocol/libraries/types/DataTypes.sol";
+import {Errors as AaveErrors} from "@aave-v3-origin/protocol/libraries/helpers/Errors.sol";
+import {ReserveConfiguration} from "@aave-v3-origin/protocol/libraries/configuration/ReserveConfiguration.sol";
 
 import {PermitHash} from "@permit2/libraries/PermitHash.sol";
 import {IAllowanceTransfer, AllowanceTransfer} from "@permit2/AllowanceTransfer.sol";
@@ -35,8 +34,8 @@ contract ForkTest is BaseTest, Configured {
     using PercentageMath for uint256;
     using SafeTransferLib for ERC20;
     using ConfigLib for Config;
-    using ReserveDataLib for DataTypes.ReserveData;
-    using ReserveDataTestLib for DataTypes.ReserveData;
+    using ReserveDataLib for DataTypes.ReserveDataLegacy;
+    using ReserveDataTestLib for DataTypes.ReserveDataLegacy;
     using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
     /* CONSTANTS */
@@ -213,43 +212,30 @@ contract ForkTest is BaseTest, Configured {
 
     /// @dev Returns the total supply used towards the supply cap.
     function _totalSupplyToCap(address underlying) internal view returns (uint256) {
-        DataTypes.ReserveData memory reserve = pool.getReserveData(underlying);
+        DataTypes.ReserveDataLegacy memory reserve = pool.getReserveData(underlying);
         uint256 poolSupplyIndex = pool.getReserveNormalizedIncome(underlying);
         uint256 poolBorrowIndex = pool.getReserveNormalizedVariableDebt(underlying);
 
         return reserve.totalSupplyToCap(poolSupplyIndex, poolBorrowIndex);
     }
 
-    /// @dev Computes the valid lower bound for ltv and lt for a given CategoryEModeId, conditions required by Aave's code.
-    /// https://github.com/aave/aave-v3-core/blob/94e571f3a7465201881a59555314cd550ccfda57/contracts/protocol/pool/PoolConfigurator.sol#L369-L376
-    function _getLtvLt(address underlying, uint8 eModeCategoryId)
-        internal
-        view
-        returns (uint256 ltvBound, uint256 ltBound, uint256 ltvConfig, uint256 ltConfig)
-    {
-        address[] memory reserves = pool.getReservesList();
-        for (uint256 i = 0; i < reserves.length; ++i) {
-            DataTypes.ReserveConfigurationMap memory currentConfig = pool.getConfiguration(reserves[i]);
-            if (eModeCategoryId == currentConfig.getEModeCategory() || underlying == reserves[i]) {
-                ltvBound = uint16(Math.max(ltvBound, currentConfig.getLtv()));
-
-                ltBound = uint16(Math.max(ltBound, currentConfig.getLiquidationThreshold()));
-
-                if (underlying == reserves[i]) {
-                    ltvConfig = uint16(currentConfig.getLtv());
-                    ltConfig = uint16(currentConfig.getLiquidationThreshold());
-                }
-            }
-        }
+    function _getLtvLt(address underlying) internal view returns (uint256 ltvConfig, uint256 ltConfig) {
+        DataTypes.ReserveConfigurationMap memory config = pool.getConfiguration(underlying);
+        ltvConfig = config.getLtv();
+        ltConfig = config.getLiquidationThreshold();
     }
 
     function _setEModeCategoryAsset(
-        DataTypes.EModeCategory memory eModeCategory,
+        DataTypes.CollateralConfig memory eModeCollateralConfig,
         address underlying,
         uint8 eModeCategoryId
     ) internal {
         poolAdmin.setEModeCategory(
-            eModeCategoryId, eModeCategory.ltv, eModeCategory.liquidationThreshold, eModeCategory.liquidationBonus, ""
+            eModeCategoryId,
+            eModeCollateralConfig.ltv,
+            eModeCollateralConfig.liquidationThreshold,
+            eModeCollateralConfig.liquidationBonus,
+            ""
         );
         poolAdmin.setAssetBorrowableInEMode(underlying, eModeCategoryId, true);
         poolAdmin.setAssetCollateralInEMode(underlying, eModeCategoryId, true);

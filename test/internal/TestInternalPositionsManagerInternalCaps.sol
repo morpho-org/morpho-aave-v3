@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.0;
 
-import {IPriceOracleGetter} from "@aave-v3-core/interfaces/IPriceOracleGetter.sol";
+import {IPriceOracleGetter} from "@aave-v3-origin/interfaces/IPriceOracleGetter.sol";
 
 import {PoolLib} from "src/libraries/PoolLib.sol";
 import {MarketLib} from "src/libraries/MarketLib.sol";
@@ -13,7 +13,7 @@ import "test/helpers/InternalTest.sol";
 
 contract TestInternalPositionsManagerInternalCaps is InternalTest, PositionsManagerInternal {
     using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
-    using ReserveDataLib for DataTypes.ReserveData;
+    using ReserveDataLib for DataTypes.ReserveDataLegacy;
     using EnumerableSet for EnumerableSet.AddressSet;
     using WadRayMath for uint256;
     using PoolLib for IPool;
@@ -116,7 +116,7 @@ contract TestInternalPositionsManagerInternalCaps is InternalTest, PositionsMana
         Types.Market storage market = _market[dai];
 
         Types.Indexes256 memory indexes = _computeIndexes(dai);
-        DataTypes.ReserveData memory reserve = pool.getReserveData(market.underlying);
+        DataTypes.ReserveDataLegacy memory reserve = pool.getReserveData(market.underlying);
         uint256 totalPoolSupply = (IAToken(market.aToken).scaledTotalSupply() + reserve.getAccruedToTreasury(indexes))
             .rayMul(indexes.supply.poolIndex);
         supplyCap = bound(

@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import {IMorpho} from "./interfaces/IMorpho.sol";
 import {IPositionsManager} from "./interfaces/IPositionsManager.sol";
-import {IPool, IPoolAddressesProvider} from "@aave-v3-core/interfaces/IPool.sol";
+import {IPool, IPoolAddressesProvider} from "@aave-v3-origin/interfaces/IPool.sol";
 import {IRewardsController} from "@aave-v3-periphery/rewards/interfaces/IRewardsController.sol";
 
 import {Types} from "./libraries/Types.sol";

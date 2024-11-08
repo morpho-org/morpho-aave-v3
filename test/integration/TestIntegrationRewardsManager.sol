@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.0;
 
-import {IScaledBalanceToken} from "@aave-v3-core/interfaces/IScaledBalanceToken.sol";
+import {IScaledBalanceToken} from "@aave-v3-origin/interfaces/IScaledBalanceToken.sol";
 import {IEACAggregatorProxy} from "@aave-v3-periphery/misc/interfaces/IEACAggregatorProxy.sol";
 import {ITransferStrategyBase} from "@aave-v3-periphery/rewards/interfaces/ITransferStrategyBase.sol";
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.17;
 
-import {IAaveOracle} from "@aave-v3-core/interfaces/IAaveOracle.sol";
-import {IPriceOracleSentinel} from "@aave-v3-core/interfaces/IPriceOracleSentinel.sol";
+import {IAaveOracle} from "@aave-v3-origin/interfaces/IAaveOracle.sol";
+import {IPriceOracleSentinel} from "@aave-v3-origin/interfaces/IPriceOracleSentinel.sol";
 
 import {Types} from "./libraries/Types.sol";
 import {Events} from "./libraries/Events.sol";
@@ -20,9 +20,9 @@ import {PercentageMath} from "@morpho-utils/math/PercentageMath.sol";
 import {LogarithmicBuckets} from "@morpho-data-structures/LogarithmicBuckets.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-import {DataTypes} from "@aave-v3-core/protocol/libraries/types/DataTypes.sol";
-import {UserConfiguration} from "@aave-v3-core/protocol/libraries/configuration/UserConfiguration.sol";
-import {ReserveConfiguration} from "@aave-v3-core/protocol/libraries/configuration/ReserveConfiguration.sol";
+import {DataTypes} from "@aave-v3-origin/protocol/libraries/types/DataTypes.sol";
+import {UserConfiguration} from "@aave-v3-origin/protocol/libraries/configuration/UserConfiguration.sol";
+import {ReserveConfiguration} from "@aave-v3-origin/protocol/libraries/configuration/ReserveConfiguration.sol";
 
 import {ERC20} from "@solmate/tokens/ERC20.sol";
 
@@ -116,7 +116,7 @@ abstract contract PositionsManagerInternal is MatchingEngine {
             revert Errors.SentinelBorrowNotEnabled();
         }
 
-        if (_eModeCategoryId != 0 && _eModeCategoryId != config.getEModeCategory()) {
+        if (!_isBorrowableInEMode(underlying)) {
             revert Errors.InconsistentEMode();
         }
 
@@ -125,8 +125,7 @@ abstract contract PositionsManagerInternal is MatchingEngine {
 
             uint256 trueP2PBorrow = market.trueP2PBorrow(indexes);
             uint256 borrowCap = config.getBorrowCap() * (10 ** config.getDecimals());
-            uint256 poolDebt =
-                ERC20(market.variableDebtToken).totalSupply() + ERC20(market.stableDebtToken).totalSupply();
+            uint256 poolDebt = ERC20(market.variableDebtToken).totalSupply();
 
             if (amount + trueP2PBorrow + poolDebt > borrowCap) revert Errors.ExceedsBorrowCap();
         }
@@ -597,21 +596,19 @@ abstract contract PositionsManagerInternal is MatchingEngine {
     ) internal view returns (uint256 amountToRepay, uint256 amountToSeize) {
         Types.AmountToSeizeVars memory vars;
 
-        DataTypes.EModeCategory memory eModeCategory;
-        if (_eModeCategoryId != 0) eModeCategory = _pool.getEModeCategoryData(_eModeCategoryId);
+        DataTypes.CollateralConfig memory eModeCollateralConfig;
+        if (_eModeCategoryId != 0) eModeCollateralConfig = _pool.getEModeCategoryCollateralConfig(_eModeCategoryId);
 
-        bool collateralIsInEMode;
         IAaveOracle oracle = IAaveOracle(_addressesProvider.getPriceOracle());
         DataTypes.ReserveConfigurationMap memory borrowedConfig = _pool.getConfiguration(underlyingBorrowed);
         DataTypes.ReserveConfigurationMap memory collateralConfig = _pool.getConfiguration(underlyingCollateral);
 
-        (, vars.borrowedPrice, vars.borrowedTokenUnit) =
-            _assetData(underlyingBorrowed, oracle, borrowedConfig, eModeCategory.priceSource);
-        (collateralIsInEMode, vars.collateralPrice, vars.collateralTokenUnit) =
-            _assetData(underlyingCollateral, oracle, collateralConfig, eModeCategory.priceSource);
+        (vars.borrowedPrice, vars.borrowedTokenUnit) = _assetData(underlyingBorrowed, oracle, borrowedConfig);
+        (vars.collateralPrice, vars.collateralTokenUnit) = _assetData(underlyingCollateral, oracle, collateralConfig);
 
-        vars.liquidationBonus =
-            collateralIsInEMode ? eModeCategory.liquidationBonus : collateralConfig.getLiquidationBonus();
+        vars.liquidationBonus = _hasTailoredParametersInEmode(underlyingCollateral)
+            ? eModeCollateralConfig.liquidationBonus
+            : collateralConfig.getLiquidationBonus();
 
         amountToRepay = maxToRepay;
         amountToSeize = (

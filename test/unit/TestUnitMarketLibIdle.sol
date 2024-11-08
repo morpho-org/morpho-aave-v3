@@ -7,7 +7,7 @@ import "test/helpers/ForkTest.sol";
 
 contract TestUnitMarketLibIdle is ForkTest {
     using ReserveDataLib for DataTypes.ReserveData;
-    using ReserveDataTestLib for DataTypes.ReserveData;
+    using ReserveDataTestLib for DataTypes.ReserveDataLegacy;
     using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
     using MarketLib for Types.Market;
     using Math for uint256;
@@ -23,7 +23,7 @@ contract TestUnitMarketLibIdle is ForkTest {
 
     function testIncreaseIdleWhenNoSupplyCap(Types.Market memory _market, uint256 amount) public {
         poolAdmin.setSupplyCap(dai, 0);
-        DataTypes.ReserveData memory reserve = pool.getReserveData(dai);
+        DataTypes.ReserveDataLegacy memory reserve = pool.getReserveData(dai);
 
         _market.indexes.supply.poolIndex = uint128(pool.getReserveNormalizedIncome(dai));
         _market.indexes.borrow.poolIndex = uint128(pool.getReserveNormalizedVariableDebt(dai));
@@ -43,7 +43,7 @@ contract TestUnitMarketLibIdle is ForkTest {
         // Set the supply gap to always be at least 1 underlying unit even if rounded down
         supplyGap = bound(supplyGap, daiTokenUnit, MAX_AMOUNT * daiTokenUnit);
 
-        DataTypes.ReserveData memory reserve = pool.getReserveData(dai);
+        DataTypes.ReserveDataLegacy memory reserve = pool.getReserveData(dai);
         uint256 poolSupplyIndex = pool.getReserveNormalizedIncome(dai);
         uint256 poolBorrowIndex = pool.getReserveNormalizedVariableDebt(dai);
 
@@ -77,7 +77,7 @@ contract TestUnitMarketLibIdle is ForkTest {
     {
         supplyGap = bound(supplyGap, daiTokenUnit, MAX_AMOUNT * daiTokenUnit);
 
-        DataTypes.ReserveData memory reserve = pool.getReserveData(dai);
+        DataTypes.ReserveDataLegacy memory reserve = pool.getReserveData(dai);
         uint256 poolSupplyIndex = pool.getReserveNormalizedIncome(dai);
         uint256 poolBorrowIndex = pool.getReserveNormalizedVariableDebt(dai);
 

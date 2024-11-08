@@ -560,4 +560,27 @@ contract TestIntegrationRewardsManager is IntegrationTest {
 
         _assertClaimRewards(rewardTokens, amounts, rewardBalancesBefore, [rewardsAfter, 0], "");
     }
+
+    function testShouldAccrueSupplyAndCollateralRewards() public {
+        uint256 amount = 1 ether;
+
+        user.approve(dai, amount);
+        user.supplyCollateral(dai, amount);
+
+        _forward(1);
+
+        address[] memory aDaiArray = new address[](1);
+        aDaiArray[0] = aDai;
+
+        uint256 accruedRewardsBefore = rewardsManager.getUserRewards(aDaiArray, address(user), wNative);
+
+        user.approve(dai, amount);
+        user.supply(dai, amount);
+
+        _forward(1);
+
+        uint256 accruedRewardsAfter = rewardsManager.getUserRewards(aDaiArray, address(user), wNative);
+
+        assertApproxEqAbs(accruedRewardsAfter, accruedRewardsBefore * 3, 1e5);
+    }
 }

@@ -25,3 +25,6 @@
 	path = lib/permit2
 	url = https://github.com/Uniswap/permit2
 	branch = f3349109ed405970a7fb3bb7e9ac9574c822a90d
+[submodule "lib/aave-v3-origin"]
+	path = lib/aave-v3-origin
+	url = git@github.com:bgd-labs/aave-v3-origin.git

@@ -22,4 +22,4 @@ avalanche = "https://rpc.ankr.com/avalanche"
 tenderly = "https://rpc.tenderly.co/fork/${TENDERLY_FORK_ID}"
 
 
-# See more config options https://github.com/foundry-rs/foundry/tree/master/config
+# See more config options https://github.com/foundry-rs/foundry/tree/master/crates/config

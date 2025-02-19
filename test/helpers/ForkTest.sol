@@ -21,7 +21,7 @@ import {Errors as AaveErrors} from "@aave-v3-core/protocol/libraries/helpers/Err
 import {ReserveConfiguration} from "@aave-v3-core/protocol/libraries/configuration/ReserveConfiguration.sol";
 
 import {PermitHash} from "@permit2/libraries/PermitHash.sol";
-import {IAllowanceTransfer, AllowanceTransfer} from "@permit2/AllowanceTransfer.sol";
+import {IAllowanceTransfer} from "@permit2/AllowanceTransfer.sol";
 
 import {PriceOracleSentinelMock} from "test/mocks/PriceOracleSentinelMock.sol";
 import {FlashBorrowerMock} from "test/mocks/FlashBorrowerMock.sol";
@@ -29,6 +29,17 @@ import {AaveOracleMock} from "test/mocks/AaveOracleMock.sol";
 import {PoolAdminMock} from "test/mocks/PoolAdminMock.sol";
 import {Configured} from "config/Configured.sol";
 import "./BaseTest.sol";
+
+import {
+    PoolInstance,
+    IPoolAddressesProvider as IPoolAddr
+} from "lib/aave-v3-origin/src/contracts/instances/PoolInstance.sol";
+import {PoolConfiguratorInstance} from "lib/aave-v3-origin/src/contracts/instances/PoolConfiguratorInstance.sol";
+import {AaveProtocolDataProvider} from "lib/aave-v3-origin/src/contracts/helpers/AaveProtocolDataProvider.sol";
+
+interface IAllowanceTransferExtended is IAllowanceTransfer {
+    function DOMAIN_SEPARATOR() external view returns (bytes32);
+}
 
 contract ForkTest is BaseTest, Configured {
     using WadRayMath for uint256;
@@ -42,7 +53,8 @@ contract ForkTest is BaseTest, Configured {
     /* CONSTANTS */
 
     address internal constant POOL_ADMIN = address(0xB055);
-    AllowanceTransfer internal constant PERMIT2 = AllowanceTransfer(0x000000000022D473030F116dDEE9F6B43aC78BA3);
+    IAllowanceTransferExtended internal constant PERMIT2 =
+        IAllowanceTransferExtended(0x000000000022D473030F116dDEE9F6B43aC78BA3);
 
     /* STORAGE */
 
@@ -107,6 +119,18 @@ contract ForkTest is BaseTest, Configured {
         poolDataProvider = IPoolDataProvider(addressesProvider.getPoolDataProvider());
         rewardsController = IRewardsController(addressesProvider.getAddress(keccak256("INCENTIVES_CONTROLLER")));
         emissionManager = rewardsController.getEmissionManager();
+
+        address newPoolImpl = address(new PoolInstance(IPoolAddr(address(addressesProvider))));
+        vm.prank(aclAdmin);
+        addressesProvider.setPoolImpl(newPoolImpl);
+
+        address newPoolConfiguratorImpl = address(new PoolConfiguratorInstance());
+        vm.prank(aclAdmin);
+        addressesProvider.setPoolConfiguratorImpl(newPoolConfiguratorImpl);
+
+        address newDataProvider = address(new AaveProtocolDataProvider(IPoolAddr(address(addressesProvider))));
+        vm.prank(aclAdmin);
+        addressesProvider.setPoolDataProvider(newDataProvider);
     }
 
     function _label() internal virtual {

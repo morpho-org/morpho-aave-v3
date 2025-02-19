@@ -12,7 +12,6 @@ import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.s
 import {Ownable2StepUpgradeable} from "@openzeppelin-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 import {PermitHash} from "@permit2/libraries/PermitHash.sol";
-import {IAllowanceTransfer, AllowanceTransfer} from "@permit2/AllowanceTransfer.sol";
 
 import {Morpho} from "src/Morpho.sol";
 import {PositionsManager} from "src/PositionsManager.sol";
